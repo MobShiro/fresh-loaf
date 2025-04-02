@@ -8,22 +8,21 @@ const OrderSummary = ({ cart, setCart }) => {
   // Calculate the overall total using quantity
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-  // Handle deleting a product from the cart (completely remove the item)
+  // Handle deleting a product from the cart (reducing quantity or removing the item if 0)
   const handleDelete = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== productId)); // Remove product completely
+    setCart(cart.filter((item) => item.id !== productId)); // Remove product completely
   };
 
   // Handle reducing the quantity of a product
   const handleReduceQuantity = (productId) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === productId && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+    setCart(cart.map((item) =>
+      item.id === productId && item.quantity > 1 
+        ? { ...item, quantity: item.quantity - 1 } 
+        : item
+    ));
   };
 
+  // Handle checkout
   const handleCheckout = () => {
     setIsCheckout(true);
     setTimeout(() => {
@@ -63,14 +62,14 @@ const OrderSummary = ({ cart, setCart }) => {
                       <td>{item.quantity}</td>
                       <td>${(item.price * item.quantity).toFixed(2)}</td>
                       <td>
-                        <button
-                          className="btn btn-danger"
+                        <button 
+                          className="btn btn-warning btn-sm me-2" 
                           onClick={() => handleReduceQuantity(item.id)}
                         >
                           -
                         </button>
-                        <button
-                          className="btn btn-danger"
+                        <button 
+                          className="btn btn-danger btn-sm" 
                           onClick={() => handleDelete(item.id)}
                         >
                           X
