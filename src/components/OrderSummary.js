@@ -64,12 +64,12 @@ const OrderSummary = ({ cart, setCart }) => {
                         <button 
                           className="btn btn-danger" 
                           onClick={() => handleReduceQuantity(item.id)}>
-                          Reduce Quantity
+                          -
                         </button>
                         <button 
                           className="btn btn-danger" 
                           onClick={() => handleDelete(item.id)}>
-                          Delete
+                          X
                         </button>
                       </td>
                     </tr>
