@@ -8,18 +8,20 @@ const OrderSummary = ({ cart, setCart }) => {
   // Calculate the overall total using quantity
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-  // Handle deleting a product from the cart (reducing quantity or removing the item if 0)
+  // Handle deleting a product from the cart (completely remove the item)
   const handleDelete = (productId) => {
-    setCart(cart.filter((item) => item.id !== productId)); // Remove product completely
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId)); // Remove product completely
   };
 
   // Handle reducing the quantity of a product
   const handleReduceQuantity = (productId) => {
-    setCart(cart.map((item) => 
-      item.id === productId && item.quantity > 1 
-        ? { ...item, quantity: item.quantity - 1 } 
-        : item
-    ));
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === productId && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
   };
 
   const handleCheckout = () => {
@@ -61,14 +63,16 @@ const OrderSummary = ({ cart, setCart }) => {
                       <td>{item.quantity}</td>
                       <td>${(item.price * item.quantity).toFixed(2)}</td>
                       <td>
-                        <button 
-                          className="btn btn-danger" 
-                          onClick={() => handleReduceQuantity(item.id)}>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleReduceQuantity(item.id)}
+                        >
                           -
                         </button>
-                        <button 
-                          className="btn btn-danger" 
-                          onClick={() => handleDelete(item.id)}>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(item.id)}
+                        >
                           X
                         </button>
                       </td>
@@ -98,4 +102,3 @@ const OrderSummary = ({ cart, setCart }) => {
 };
 
 export default OrderSummary;
-
