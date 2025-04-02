@@ -1,19 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const OrderSummary = ({ cart }) => {
+const OrderSummary = ({ cart, setCart }) => {
   const [isCheckout, setIsCheckout] = useState(false);
   const navigate = useNavigate();
 
+  // Calculate the overall total using quantity
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  // Handle deleting a product from the cart (reducing quantity or removing the item if 0)
+  const handleDelete = (productId) => {
+    setCart(cart.filter((item) => item.id !== productId)); // Remove product completely
+  };
+
+  // Handle reducing the quantity of a product
+  const handleReduceQuantity = (productId) => {
+    setCart(cart.map((item) => 
+      item.id === productId && item.quantity > 1 
+        ? { ...item, quantity: item.quantity - 1 } 
+        : item
+    ));
+  };
 
   const handleCheckout = () => {
     setIsCheckout(true);
     setTimeout(() => {
-      navigate("/"); 
-    }, 3000);
+      navigate("/"); // Redirect to home after 10 seconds
+    }, 10000);
   };
 
+  // Back button handler to navigate to the products page
   const handleBack = () => {
     navigate("/products");
   };
@@ -34,15 +50,28 @@ const OrderSummary = ({ cart }) => {
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>SubTotal</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {cart.map((item, index) => (
-                    <tr key={index}>
+                  {cart.map((item) => (
+                    <tr key={item.id}>
                       <td>{item.name}</td>
                       <td>${item.price.toFixed(2)}</td>
                       <td>{item.quantity}</td>
                       <td>${(item.price * item.quantity).toFixed(2)}</td>
+                      <td>
+                        <button 
+                          className="btn btn-danger" 
+                          onClick={() => handleReduceQuantity(item.id)}>
+                          Reduce Quantity
+                        </button>
+                        <button 
+                          className="btn btn-danger" 
+                          onClick={() => handleDelete(item.id)}>
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -69,3 +98,4 @@ const OrderSummary = ({ cart }) => {
 };
 
 export default OrderSummary;
+
