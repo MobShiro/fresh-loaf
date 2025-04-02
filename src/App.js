@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
-import Navbar from "./components/Navbar";
 import OrderSummary from "./components/OrderSummary";
-import Cart from "./components/Cart";
+import Cart from "./components/Cart"; 
 
 const App = () => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState([]); 
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -17,7 +17,6 @@ const App = () => {
         newCart[index].quantity += 1;
         return newCart;
       }
-    
       return [...prevCart, { ...product, quantity: 1 }];
     });
   };
@@ -27,8 +26,9 @@ const App = () => {
       <Navbar cart={cart} />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products addToCart={addToCart} />} />
-        <Route path="/order-summary" element={<OrderSummary cart={cart} />} />
+        <Route path="/products" element={<Products addToCart={addToCart} setCart={setCart} />} />
+        <Route path="/order-summary" element={<OrderSummary cart={cart} setCart={setCart} />} />
+        <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} /> 
       </Routes>
     </Router>
   );
