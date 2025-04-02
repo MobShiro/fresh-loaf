@@ -169,3 +169,27 @@ body {
         padding: 10px; 
     }
 }
+
+.cart-item button {
+  background-color: #f7b03a;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+}
+
+.cart-item button:hover {
+  background-color: #c77b2b;
+}
+
+.btn-danger {
+  background-color: #ff4d4d;
+}
+
+.btn-danger:hover {
+  background-color: #d63030;
+}
+
