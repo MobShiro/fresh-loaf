@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { db, auth } from "../../firebase";
 import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import { signOut } from "firebase/auth";
 import "../styles.css";
 
 const AdminDashboard = () => {
@@ -193,43 +192,29 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminAuth");
-    signOut(auth).then(() => {
-      navigate("/admin/login");
-    }).catch((error) => {
-      console.error("Error signing out:", error);
-    });
-  };
-
   if (loading) {
     return (
-      <div className="container mt-5 text-center">
+      <div className="admin-loading text-center py-5">
         <div className="spinner-border" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
+        <p className="mt-3">Loading admin data...</p>
       </div>
     );
   }
 
   return (
-    <div className="admin-dashboard">
-      <div className="container mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Admin Dashboard</h2>
-          <button className="btn btn-danger" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-
+    <div className="admin-dashboard-content">
+      <div className="container-fluid mt-4">
         {error && <div className="alert alert-danger">{error}</div>}
 
-        <ul className="nav nav-tabs mb-4">
+        <ul className="nav nav-tabs admin-tabs mb-4">
           <li className="nav-item">
             <button
               className={`nav-link ${activeTab === "orders" ? "active" : ""}`}
               onClick={() => setActiveTab("orders")}
             >
+              <i className="bi bi-box-seam me-2"></i>
               Orders Management
             </button>
           </li>
@@ -238,6 +223,7 @@ const AdminDashboard = () => {
               className={`nav-link ${activeTab === "users" ? "active" : ""}`}
               onClick={() => setActiveTab("users")}
             >
+              <i className="bi bi-people me-2"></i>
               User Management
             </button>
           </li>
@@ -245,8 +231,18 @@ const AdminDashboard = () => {
 
         {activeTab === "orders" ? (
           <div className="orders-section">
-            <h3>Orders ({orders.length})</h3>
-            <div className="table-responsive">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3>Orders ({orders.length})</h3>
+              <div className="admin-action-buttons">
+                <button className="btn btn-outline-primary btn-sm me-2">
+                  <i className="bi bi-file-earmark-excel me-1"></i> Export
+                </button>
+                <button className="btn btn-outline-secondary btn-sm">
+                  <i className="bi bi-funnel me-1"></i> Filter
+                </button>
+              </div>
+            </div>
+            <div className="table-responsive admin-table">
               <table className="table table-striped">
                 <thead>
                   <tr>
@@ -318,8 +314,15 @@ const AdminDashboard = () => {
           </div>
         ) : (
           <div className="users-section">
-            <h3>Users ({users.length})</h3>
-            <div className="table-responsive">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3>Users ({users.length})</h3>
+              <div className="admin-action-buttons">
+                <button className="btn btn-outline-primary btn-sm">
+                  <i className="bi bi-file-earmark-excel me-1"></i> Export
+                </button>
+              </div>
+            </div>
+            <div className="table-responsive admin-table">
               <table className="table table-striped">
                 <thead>
                   <tr>
@@ -336,7 +339,11 @@ const AdminDashboard = () => {
                       <td>{user.id.substring(0, 8)}...</td>
                       <td>{user.email}</td>
                       <td>{user.displayName || "N/A"}</td>
-                      <td>{user.isAdmin ? "Admin" : "User"}</td>
+                      <td>
+                        <span className={`badge ${user.isAdmin ? "bg-danger" : "bg-info"}`}>
+                          {user.isAdmin ? "Admin" : "User"}
+                        </span>
+                      </td>
                       <td>
                         <button
                           className="btn btn-sm btn-danger"

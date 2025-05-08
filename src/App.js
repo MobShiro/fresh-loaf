@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import AdminLayout from "./components/AdminLayout";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import OrderSummary from "./components/OrderSummary";
@@ -26,6 +27,16 @@ const LoadingFallback = () => (
     <p className="mt-3">Loading Fresh Loaf...</p>
   </div>
 );
+
+// Main layout with navbar for customer-facing pages
+const MainLayout = () => {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
+};
 
 // Error boundary for catching rendering errors
 class ErrorBoundary extends React.Component {
@@ -115,39 +126,54 @@ const App = () => {
       <AuthProvider>
         <Router>
           <div className="app-container">
-            <Navbar cart={cart} />
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/products" element={
-                  <ProtectedRoute>
-                    <Products addToCart={addToCart} setCart={setCart} />
-                  </ProtectedRoute>
-                } />
-                <Route path="/order-summary" element={
-                  <ProtectedRoute>
-                    <OrderSummary cart={cart} setCart={setCart} />
-                  </ProtectedRoute>
-                } />
-                <Route path="/cart" element={
-                  <ProtectedRoute>
-                    <Cart cart={cart} setCart={setCart} />
-                  </ProtectedRoute>
-                } />
-                <Route path="/orders" element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                } />
+                {/* Admin Routes with AdminLayout */}
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminLayout>
+                        <Outlet />
+                      </AdminLayout>
+                    </AdminProtectedRoute>
+                  }
+                >
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                </Route>
+                
+                {/* Admin Login (no layout) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/dashboard" element={
-                  <AdminProtectedRoute>
-                    <AdminDashboard />
-                  </AdminProtectedRoute>
-                } />
+
+                {/* Customer Routes with MainLayout */}
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="verify-email" element={<VerifyEmail />} />
+                  <Route path="products" element={
+                    <ProtectedRoute>
+                      <Products addToCart={addToCart} setCart={setCart} />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="order-summary" element={
+                    <ProtectedRoute>
+                      <OrderSummary cart={cart} setCart={setCart} />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="cart" element={
+                    <ProtectedRoute>
+                      <Cart cart={cart} setCart={setCart} />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="orders" element={
+                    <ProtectedRoute>
+                      <Orders />
+                    </ProtectedRoute>
+                  } />
+                </Route>
+
+                {/* Catch-all route */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
