@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const Navbar = ({ cart }) => {
+const Navbar = ({ cart = [] }) => {
   const { currentUser, isAuthenticated, logout } = useAuth();
   const [homeClickCount, setHomeClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -65,7 +65,7 @@ const Navbar = ({ cart }) => {
               <Link className="btn btn-outline-light me-2" to="/products">Products</Link>
               <Link className="btn btn-outline-light me-2" to="/orders">Orders</Link>
               <Link className="btn btn-outline-light me-2" to="/order-summary">
-                Cart ({cart.length})
+                Cart ({cart ? cart.length : 0})
               </Link>
             </>
           )}
