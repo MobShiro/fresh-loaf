@@ -1,13 +1,98 @@
-import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState, useEffect, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import OrderSummary from "./components/OrderSummary";
 import Cart from "./components/Cart"; 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import Orders from "./pages/Orders";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./pages/styles.css";
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="text-center mt-5 pt-5">
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+    <p className="mt-3">Loading Fresh Loaf...</p>
+  </div>
+);
+
+// Error boundary for catching rendering errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("App Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="container text-center mt-5 pt-5">
+          <h2>Something went wrong.</h2>
+          <p>Please try refreshing the page.</p>
+          <button 
+            className="btn btn-primary mt-3" 
+            onClick={() => window.location.reload()}
+          >
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const App = () => {
-  const [cart, setCart] = useState([]); 
+  const [cart, setCart] = useState([]);
+  const [isAppReady, setIsAppReady] = useState(false);
+  
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('freshLoafCart');
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+      
+      // Simulate a small delay to ensure all resources are loaded
+      const readyTimer = setTimeout(() => {
+        setIsAppReady(true);
+      }, 200);
+      
+      return () => clearTimeout(readyTimer);
+    } catch (error) {
+      console.error("Error loading saved cart:", error);
+    }
+  }, []);
+  
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('freshLoafCart', JSON.stringify(cart));
+    } catch (error) {
+      console.error("Error saving cart:", error);
+    }
+  }, [cart]);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -21,16 +106,55 @@ const App = () => {
     });
   };
 
+  if (!isAppReady) {
+    return <LoadingFallback />;
+  }
+
   return (
-    <Router>
-      <Navbar cart={cart} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products addToCart={addToCart} setCart={setCart} />} />
-        <Route path="/order-summary" element={<OrderSummary cart={cart} setCart={setCart} />} />
-        <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} /> 
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="app-container">
+            <Navbar cart={cart} />
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/products" element={
+                  <ProtectedRoute>
+                    <Products addToCart={addToCart} setCart={setCart} />
+                  </ProtectedRoute>
+                } />
+                <Route path="/order-summary" element={
+                  <ProtectedRoute>
+                    <OrderSummary cart={cart} setCart={setCart} />
+                  </ProtectedRoute>
+                } />
+                <Route path="/cart" element={
+                  <ProtectedRoute>
+                    <Cart cart={cart} setCart={setCart} />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={
+                  <AdminProtectedRoute>
+                    <AdminDashboard />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 
